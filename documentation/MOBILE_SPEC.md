@@ -1,5 +1,8 @@
 # Especificação Mobile - Flutter (Dart)
 
+## Pasta mobile:
+- school-tests-platform/mobile
+
 ## UX e Regras de Negócio
 1. **Login Aluno:** Via Google Sign-In ou JWT.
 2. **Dashboard do Aluno:**

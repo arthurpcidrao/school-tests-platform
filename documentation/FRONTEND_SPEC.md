@@ -1,5 +1,8 @@
 # Especificação Frontend Web - Next.js 14
 
+## Pasta frontend:
+- school-tests-platform/frontend
+
 ## Estrutura de Páginas
 1. **Landing Page:** Apresentação do SaaS e conversão.
 2. **Auth:** Login/Cadastro (Exclusivo Professor).

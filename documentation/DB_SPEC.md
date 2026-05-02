@@ -2,6 +2,9 @@
 
 **Engine:** PostgreSQL 15+ (GCP Cloud SQL)
 
+## Pasta banco de dados e backend:
+- school-tests-platform/database
+- school-tests-platform/backend
 ## Entidades e Colunas
 
 ### 1. `users`
@@ -43,3 +46,22 @@
 - `test_id`: UUID (FK -> tests.id)
 - `question_id`: UUID (FK -> questions.id)
 - `order_index`: Integer
+
+### 6. `test_attempts` (Novo - Performance)
+Tabela que registra o ciclo de vida da prova do aluno no servidor.
+- `id`: UUID (PK)  
+- `test_id`: UUID (FK -> tests.id)  
+- `user_id`: UUID (FK -> users.id)  
+- `start_at`: DateTime  
+- `finished_at`: DateTime (Preenchido no momento do sync final)  
+- `status`: Enum (IN_PROGRESS, FINISHED, EXPIRED)  
+
+### 7. `tudent_responses` (Novo - Performance)
+Armazena as respostas reais que alimentam os Dashboards de métricas.
+- `id`: UUID (PK)  
+- `attempt_id`: UUID (FK -> test_attempts.id)  
+- `question_id`: UUID (FK -> questions.id)  
+- `selected_item_id`: UUID (FK -> items.id, nulo se discursiva)
+- `text_response`: Text (nulo se objetiva)  
+- `is_correct`: Boolean (Calculado pelo backend durante o sync para questões objetivas)  
+- `score_assigned`: Decimal (Nota final atribuída após validação do professor)  

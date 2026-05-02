@@ -1,5 +1,8 @@
 # Especificação Backend - Django + Django Ninja
 
+## Pasta Backend:
+- school-tests-platform/backend/
+
 ## Requisitos de Autenticação
 - **JWT (SimpleJWT):** Autenticação Stateless.
 - **Autenticação por Google:** Integração com Google Sign-In para autenticação de usuários.
@@ -18,3 +21,6 @@
    - Lógica de correção instantânea para questões objetivas.
 4. **Analytics:**
    - Agregação de dados por disciplina e competência BNCC para o Dashboard.
+
+
+Fazer testes unitários para todas as camadas do backend

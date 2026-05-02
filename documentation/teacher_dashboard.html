@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sistema de Simulados Escolares - Professor Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "text-primary": "#333333",
+                        "on-primary-container": "#fefcff",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e1e2ed",
+                        "primary-fixed": "#dae2ff",
+                        "outline-variant": "#c2c6d7",
+                        "surface-bright": "#faf8ff",
+                        "background": "#F4F4F9",
+                        "on-primary-fixed-variant": "#00409f",
+                        "on-secondary-container": "#005a73",
+                        "tertiary-fixed": "#ffdbcb",
+                        "surface-container-high": "#e7e7f3",
+                        "secondary-fixed": "#bde9ff",
+                        "on-surface": "#191b23",
+                        "danger": "#e74c3c",
+                        "surface-container": "#ecedf9",
+                        "on-secondary-fixed-variant": "#004d64",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#001847",
+                        "surface": "#FFFFFF",
+                        "secondary-container": "#6bd3fd",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#001f2a",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#c25200",
+                        "on-tertiary-container": "#fffbff",
+                        "text-secondary": "#666666",
+                        "surface-tint": "#0056d0",
+                        "on-surface-variant": "#424655",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f3fe",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#b1c5ff",
+                        "outline": "#727786",
+                        "inverse-on-surface": "#eff0fb",
+                        "tertiary-fixed-dim": "#ffb692",
+                        "on-tertiary-fixed": "#341100",
+                        "on-tertiary-fixed-variant": "#793100",
+                        "tertiary": "#eebba1",
+                        "surface-dim": "#d8d9e5",
+                        "primary": "#0054cb",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#206cf3",
+                        "primary-fixed-dim": "#b1c5ff",
+                        "border": "#E2E8F0",
+                        "success": "#2ecc71",
+                        "on-error": "#ffffff",
+                        "warning": "#f1c40f",
+                        "surface-variant": "#e1e2ed",
+                        "on-background": "#191b23",
+                        "inverse-surface": "#2e3039",
+                        "secondary-fixed-dim": "#6bd3fd",
+                        "secondary": "#006683"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "md": "24px",
+                        "xs": "4px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "button": ["Lexend"],
+                        "body-sm": ["Inter"],
+                        "h3": ["Lexend"],
+                        "label-caps": ["Inter"],
+                        "h2": ["Lexend"],
+                        "h1": ["Lexend"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "button": ["16px", {"lineHeight": "1", "fontWeight": "500"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "h3": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "h1": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F4F9;
+            color: #333333;
+        }
+        .font-lexend { font-family: 'Lexend', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 border-r rounded-none bg-white flex flex-col p-4 gap-2 border-slate-200 sticky top-0">
+<div class="flex items-center gap-3 px-4 py-6 mb-4">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+</div>
+<div>
+<h1 class="text-lg font-semibold text-slate-900 font-lexend leading-tight">Painel Admin</h1>
+<p class="text-xs text-slate-500 font-lexend">Ano Letivo 2024</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active Navigation -->
+<a class="bg-blue-50 text-blue-600 font-bold rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#"><span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Painel</a>
+<a class="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#"><span class="material-symbols-outlined" data-icon="description">description</span> Simulados</a>
+<a class="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#"><span class="material-symbols-outlined" data-icon="database">database</span> Banco de Questões</a>
+<a class="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#"><span class="material-symbols-outlined" data-icon="school">school</span> Alunos</a>
+<a class="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#"><span class="material-symbols-outlined" data-icon="analytics">analytics</span> Relatórios</a>
+</nav>
+<div class="mt-auto border-t border-slate-100 pt-4 space-y-1">
+<a class="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#"><span class="material-symbols-outlined" data-icon="help">help</span> Central de Ajuda</a>
+<a class="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#"><span class="material-symbols-outlined" data-icon="logout">logout</span> Sair</a>
+</div>
+</aside>
+<div class="flex-1 flex flex-col min-w-0">
+<!-- TopNavBar Component -->
+<header class="flex justify-between items-center h-16 px-6 w-full bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-primary-container text-sm font-body-md" placeholder="Pesquisar por simulados ou alunos..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-sm font-semibold font-lexend">Prof. Ricardo Silva</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Matemática</p>
+</div>
+<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary-fixed" data-alt="professional portrait of a middle-aged male teacher with glasses in a modern educational environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_3l2_7FhEfkp3DgKB1D4ywGAiw0S5vZggqnokbtkyejSBZ3X_BJgHLy12ZtP9AMIDP_KyLWaUzS1LZttPBv56Go_-sr7lOIE9EyFOVBzmOmE6PM9ywLXfvBTkAunwVc1Z6amiSzDKmFzgH6tPNX4njTI7HCD1e1Hr5-GVlw80xwTxFwKdIqX02MQ-TBfeTbhQPbo4UPzUVtiZfOgGCxY5mO3e8LL3pFKKY7E15tfkBW7sGUYpvJ-fUoDTfbH9GrUNBvnZzC-K5xIr"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="p-gutter overflow-y-auto">
+<div class="max-w-container-max mx-auto space-y-md">
+<!-- Page Header with CTA -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-h1 text-h1 text-on-surface">Visão Geral do Painel</h2>
+<p class="font-body-md text-text-secondary">Bem-vindo de volta. Veja o que está acontecendo com suas turmas hoje.</p>
+</div>
+<button class="bg-primary text-on-primary font-button px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"><span class="material-symbols-outlined" data-icon="add">add</span> Criar Novo Simulado</button>
+</div>
+<!-- Bento Grid Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<!-- Stat 1 -->
+<div class="bg-surface p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-blue-50 text-primary rounded-lg">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</div>
+<span class="text-success text-xs font-bold font-lexend flex items-center">
+<span class="material-symbols-outlined text-xs mr-1">trending_up</span> +12%
+                            </span>
+</div>
+<div class="mt-4">
+<p class="text-text-secondary font-label-caps text-label-caps">ALUNOS ATIVOS</p>
+<h3 class="font-h2 text-h2 mt-1">1,284</h3>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="bg-surface p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-orange-50 text-tertiary-container rounded-lg">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+</div>
+<span class="text-success text-xs font-bold font-lexend flex items-center">
+<span class="material-symbols-outlined text-xs mr-1">trending_up</span> +5.2%
+                            </span>
+</div>
+<div class="mt-4">
+<p class="text-text-secondary font-label-caps text-label-caps">DESEMPENHO MÉDIO</p>
+<h3 class="font-h2 text-h2 mt-1">78.4%</h3>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="bg-surface p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-green-50 text-success rounded-lg">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+</div>
+<span class="text-text-secondary text-xs font-bold font-lexend">Target: 85%</span>
+</div>
+<div class="mt-4">
+<p class="text-text-secondary font-label-caps text-label-caps">SIMULADOS CONCLUÍDOS</p>
+<h3 class="font-h2 text-h2 mt-1">42</h3>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="bg-surface p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+<span class="material-symbols-outlined" data-icon="hourglass_empty">hourglass_empty</span>
+</div>
+<span class="text-danger text-xs font-bold font-lexend flex items-center"><span class="material-symbols-outlined text-xs mr-1">warning</span> 3 Pendentes</span>
+</div>
+<div class="mt-4">
+<p class="text-text-secondary font-label-caps text-label-caps">TEMPO MÉDIO GASTO</p>
+<h3 class="font-h2 text-h2 mt-1">48<span class="text-body-md font-normal">min</span></h3>
+</div>
+</div>
+</div>
+<!-- Main Grid: Chart & Active Exams -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+<!-- Performance Chart Container -->
+<div class="lg:col-span-2 bg-surface p-6 rounded-xl border border-border shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="font-h3 text-h3">Análise de Desempenho</h3>
+<p class="text-body-sm text-text-secondary">Distribuição média de notas ao longo do tempo</p>
+</div>
+<div class="flex bg-slate-50 p-1 rounded-lg">
+<button class="px-3 py-1 text-xs font-bold rounded-md bg-white shadow-sm">Semanal</button>
+<button class="px-3 py-1 text-xs font-bold text-slate-500">Mensal</button>
+</div>
+</div>
+<div class="h-[300px] w-full relative flex items-end justify-between gap-2 pt-10">
+<!-- Placeholder for Chart - Using CSS Bars for UI fidelity -->
+<div class="flex-1 bg-primary/10 rounded-t-lg relative group h-[40%]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-inverse-surface text-on-primary px-2 py-1 rounded text-[10px] transition-all">65%</div>
+</div>
+<div class="flex-1 bg-primary/20 rounded-t-lg relative group h-[60%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t-lg relative group h-[55%]"></div>
+<div class="flex-1 bg-primary/60 rounded-t-lg relative group h-[75%]"></div>
+<div class="flex-1 bg-primary/80 rounded-t-lg relative group h-[90%]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-inverse-surface text-on-primary px-2 py-1 rounded text-[10px] transition-all">92%</div>
+</div>
+<div class="flex-1 bg-primary/40 rounded-t-lg relative group h-[65%]"></div>
+<div class="flex-1 bg-primary/20 rounded-t-lg relative group h-[45%]"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2"><span class="material-symbols-outlined text-xs">schedule</span> Termina em 2h 15m</div>
+</div>
+<!-- Active Exams List -->
+<div class="bg-surface rounded-xl border border-border shadow-sm flex flex-col">
+<div class="p-6 border-b border-slate-100 flex justify-between items-center">
+<h3 class="font-h3 text-h3">Simulados Ativos</h3>
+<a class="text-primary text-xs font-bold hover:underline" href="#">Ver Todos</a>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-3">
+<!-- Exam Item 1 -->
+<div class="p-4 rounded-xl border border-slate-100 hover:border-primary/30 transition-colors bg-surface-container-low/30 group">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-bold text-sm text-on-surface line-clamp-1">Simulado Geral - 3º Ano A</h4>
+<span class="px-2 py-1 bg-success/10 text-success text-[10px] font-bold rounded-full">AO VIVO</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-xs text-text-secondary">
+<span>Participação</span>
+<span class="font-bold">42/45 (93%)</span>
+</div>
+<div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">RASCUNHO</div>
+<div class="flex items-center gap-2 text-[10px] text-slate-400 font-medium"><span class="material-symbols-outlined text-xs">schedule</span> Começa amanhã</div>
+</div>
+</div>
+<!-- Exam Item 2 -->
+<div class="p-4 rounded-xl border border-slate-100 hover:border-primary/30 transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-bold text-sm text-on-surface line-clamp-1">Trigonometria Avançada</h4>
+<span class="px-2 py-1 bg-warning/10 text-warning text-[10px] font-bold rounded-full">PENDENTE</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-xs text-text-secondary">
+<span>Participação</span>
+<span class="font-bold">12/38 (31%)</span>
+</div>
+<div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">RASCUNHO</div>
+<div class="flex items-center gap-2 text-[10px] text-slate-400 font-medium"><span class="material-symbols-outlined text-xs">schedule</span> Começa amanhã</div>
+</div>
+</div>
+<!-- Exam Item 3 -->
+<div class="p-4 rounded-xl border border-slate-100 hover:border-primary/30 transition-colors group">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-bold text-sm text-on-surface line-clamp-1">Recuperação Trimestral</h4>
+<span class="px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-full">RASCUNHO</span>
+</div>
+<div class="space-y-3">
+<p class="text-xs text-text-secondary italic">Rascunho salvo há 2 horas</p>
+<div class="flex items-center gap-2 text-[10px] text-primary font-bold cursor-pointer hover:underline"><span class="material-symbols-outlined text-xs">edit</span> Continuar editando</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Row: Recent Students & Quick Tools -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md pb-xl">
+<!-- Recent Performance -->
+<div class="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-100">
+<h3 class="font-h3 text-h3">Alunos com Melhor Desempenho</h3>
+</div>
+<div class="p-0">
+<table class="w-full text-left">
+<thead class="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+<tr>
+<th class="px-6 py-3">Aluno</th>
+<th class="px-6 py-3">Último Simulado</th>
+<th class="px-6 py-3">Nota</th>
+<th class="px-6 py-3 text-right">Ação</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50">
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-xs">AM</div>
+<span class="text-sm font-semibold">Ana Martins</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs text-text-secondary">Simulado Geral</td>
+<td class="px-6 py-4"><span class="text-sm font-bold text-success">9.8</span></td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-blue-50 p-1 rounded-md">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs">BL</div>
+<span class="text-sm font-semibold">Bruno Lima</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs text-text-secondary">Simulado Geral</td>
+<td class="px-6 py-4"><span class="text-sm font-bold text-success">9.5</span></td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-blue-50 p-1 rounded-md">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">CS</div>
+<span class="text-sm font-semibold">Carla Souza</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs text-text-secondary">Trigonometria</td>
+<td class="px-6 py-4"><span class="text-sm font-bold text-success">9.2</span></td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-blue-50 p-1 rounded-md">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Question Bank Preview -->
+<div class="bg-primary p-6 rounded-xl text-on-primary shadow-xl relative overflow-hidden flex flex-col justify-between">
+<!-- Abstract Background Decoration -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+<div class="absolute bottom-0 left-0 w-48 h-48 bg-primary-container/30 rounded-full -ml-16 -mb-16 blur-3xl"></div>
+<div class="relative z-10">
+<h3 class="font-h3 text-h3 mb-2">Banco de Questões</h3>
+<p class="text-white/80 text-body-sm max-w-xs">Acesse sua biblioteca de mais de 4.200 questões acadêmicas. Verificadas por padrões pedagógicos.</p>
+<div class="mt-6 flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">Matemática (824)</span>
+<span class="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">Física (412)</span>
+<span class="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">Química (398)</span>
+</div>
+</div>
+<div class="relative z-10 mt-8">
+<button class="w-full bg-white text-primary font-button py-3 rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"><span class="material-symbols-outlined" data-icon="search">search</span> Explorar Questões</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Action Button (FAB) - Visible only on specific dashboard context as per mandate -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] md:hidden">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+</body></html>

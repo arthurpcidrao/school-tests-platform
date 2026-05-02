@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Lexend:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#00409f",
+                    "on-primary-fixed": "#001847",
+                    "surface-tint": "#0056d0",
+                    "success": "#2ecc71",
+                    "on-secondary": "#ffffff",
+                    "surface-variant": "#e1e2ed",
+                    "on-surface": "#191b23",
+                    "warning": "#f1c40f",
+                    "surface-container": "#ecedf9",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#dae2ff",
+                    "secondary": "#006683",
+                    "surface-container-low": "#f2f3fe",
+                    "primary-container": "#206cf3",
+                    "on-tertiary-container": "#fffbff",
+                    "inverse-on-surface": "#eff0fb",
+                    "secondary-fixed": "#bde9ff",
+                    "text-secondary": "#666666",
+                    "tertiary-fixed": "#ffdbcb",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#004d64",
+                    "inverse-surface": "#2e3039",
+                    "border": "#E2E8F0",
+                    "on-primary-container": "#fefcff",
+                    "tertiary": "#eebba1",
+                    "surface-container-high": "#e7e7f3",
+                    "text-primary": "#333333",
+                    "primary": "#0054cb",
+                    "secondary-container": "#6bd3fd",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#793100",
+                    "on-surface-variant": "#424655",
+                    "surface": "#FFFFFF",
+                    "tertiary-container": "#c25200",
+                    "on-secondary-container": "#005a73",
+                    "outline-variant": "#c2c6d7",
+                    "error": "#ba1a1a",
+                    "surface-container-highest": "#e1e2ed",
+                    "on-background": "#191b23",
+                    "inverse-primary": "#b1c5ff",
+                    "on-error": "#ffffff",
+                    "background": "#F4F4F9",
+                    "tertiary-fixed-dim": "#ffb692",
+                    "surface-dim": "#d8d9e5",
+                    "danger": "#e74c3c",
+                    "outline": "#727786",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed": "#001f2a",
+                    "primary-fixed-dim": "#b1c5ff",
+                    "secondary-fixed-dim": "#6bd3fd",
+                    "on-tertiary-fixed": "#341100",
+                    "surface-bright": "#faf8ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "64px",
+                    "xs": "4px",
+                    "sm": "12px",
+                    "gutter": "24px",
+                    "base": "8px",
+                    "md": "24px",
+                    "lg": "40px",
+                    "container-max": "1280px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter"],
+                    "button": ["Lexend"],
+                    "body-sm": ["Inter"],
+                    "h1": ["Lexend"],
+                    "h2": ["Lexend"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "h3": ["Lexend"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "button": ["16px", {"lineHeight": "1", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "h1": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h3": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .focused-shadow {
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar (Shell Filter Applied: Simplified version for focused task) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 h-16 bg-white shadow-sm border-b border-slate-200">
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-slate-600">close</span>
+</button>
+<div class="flex flex-col">
+<h1 class="font-lexend text-sm font-bold text-primary tracking-tight">EduSimulados</h1>
+<p class="font-body-sm text-[10px] text-text-secondary uppercase tracking-widest">Matemática e Suas Tecnologias</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-primary-container/10 px-3 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">timer</span>
+<span class="font-lexend text-primary font-semibold text-sm">42:15</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-20 pb-24 px-4 max-w-md mx-auto w-full">
+<!-- Progress Bar -->
+<div class="mb-6">
+<div class="flex justify-between items-end mb-2">
+<span class="font-lexend text-xs font-semibold text-text-secondary">QUESTÃO 08 DE 45</span>
+<span class="font-lexend text-xs font-bold text-primary">18% concluído</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[18%] transition-all duration-500"></div>
+</div>
+</div>
+<!-- Question Card -->
+<div class="bg-white rounded-xl border border-border focused-shadow p-5 mb-gutter">
+<!-- Question Content -->
+<div class="space-y-4">
+<div class="inline-block px-3 py-1 bg-secondary-fixed text-on-secondary-fixed rounded-lg text-[10px] font-bold uppercase tracking-wider">
+                    Dificuldade Média
+                </div>
+<h2 class="font-h3 text-text-primary">
+                    Considerando o conjunto de números naturais, qual é o resultado da soma dos dez primeiros números primos?
+                </h2>
+<p class="font-body-md text-on-surface-variant leading-relaxed">
+                    A soma de números primos é um conceito fundamental na teoria dos números. Para resolver esta questão, identifique corretamente a sequência inicial de primos antes de realizar o cálculo final.
+                </p>
+<!-- Visual Asset / Diagram (Optional) -->
+<div class="rounded-lg overflow-hidden border border-border my-4">
+<img alt="Math Diagram" class="w-full h-40 object-cover" data-alt="Abstract mathematical concept visualization with blue geometric lines and soft depth of field effect on clean white background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV_CuioKqN24L7JuqajnvD6EwgWkvQfMyZYpmVdUJqKZWInnKrMnneKiXaOlyCVF1OL3L6sCwtjlREsmMd8oRTimp68ZvM1E0k5inDzmU2fJi5N5LNFPC6J9m9shZJbicNCI4U4-a1DVfBY6CzRJswGIaykUCa1ce1uo9CNZwKHQHQG2KMwaNDCae8FqQwsOPurdPQxaXGXsnBs5vMmb4V5bl4-LmpVXonaWUmQfOlS3UZ1iLS0UH39O3jKsz7BDtwqfSGiDw8vqvc"/>
+</div>
+</div>
+</div>
+<!-- Alternatives Section -->
+<div class="space-y-3 pb-8">
+<!-- Option A -->
+<label class="group relative flex items-center p-4 bg-white border border-border rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:border-primary/30">
+<input class="peer hidden" name="alternative" type="radio"/>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-lexend font-bold text-text-secondary group-hover:bg-primary/10 group-hover:text-primary peer-checked:bg-primary peer-checked:text-white transition-colors">
+                    A
+                </div>
+<span class="ml-4 font-body-md text-text-primary peer-checked:font-semibold">129</span>
+<div class="absolute right-4 opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+<!-- Option B -->
+<label class="group relative flex items-center p-4 bg-white border border-border rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:border-primary/30">
+<input checked="" class="peer hidden" name="alternative" type="radio"/>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-lexend font-bold text-text-secondary group-hover:bg-primary/10 group-hover:text-primary peer-checked:bg-primary peer-checked:text-white transition-colors">
+                    B
+                </div>
+<span class="ml-4 font-body-md text-text-primary peer-checked:font-semibold">131</span>
+<div class="absolute right-4 opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+<!-- Option C -->
+<label class="group relative flex items-center p-4 bg-white border border-border rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:border-primary/30">
+<input class="peer hidden" name="alternative" type="radio"/>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-lexend font-bold text-text-secondary group-hover:bg-primary/10 group-hover:text-primary peer-checked:bg-primary peer-checked:text-white transition-colors">
+                    C
+                </div>
+<span class="ml-4 font-body-md text-text-primary peer-checked:font-semibold">143</span>
+<div class="absolute right-4 opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+<!-- Option D -->
+<label class="group relative flex items-center p-4 bg-white border border-border rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:border-primary/30">
+<input class="peer hidden" name="alternative" type="radio"/>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-lexend font-bold text-text-secondary group-hover:bg-primary/10 group-hover:text-primary peer-checked:bg-primary peer-checked:text-white transition-colors">
+                    D
+                </div>
+<span class="ml-4 font-body-md text-text-primary peer-checked:font-semibold">152</span>
+<div class="absolute right-4 opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+</div>
+<!-- Flag Button -->
+<button class="flex items-center gap-2 text-text-secondary hover:text-warning transition-colors mx-auto mb-8">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+<span class="font-label-caps uppercase">Marcar para revisar depois</span>
+</button>
+</main>
+<!-- Bottom Action Bar (Contextual/Task specific) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md px-4 pb-safe h-24 border-t border-slate-200 flex items-center justify-between">
+<button class="flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 font-button text-slate-600 active:bg-slate-100 transition-all">
+<span class="material-symbols-outlined">arrow_back</span>
+            Anterior
+        </button>
+<button class="flex items-center gap-2 px-8 py-3 rounded-xl bg-primary text-white font-button shadow-lg shadow-primary/20 active:scale-95 transition-all">
+            Próxima
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+</body></html>
