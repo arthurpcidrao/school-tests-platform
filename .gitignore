@@ -1,0 +1,210 @@
+# =========================================================
+# MONOREPO GITIGNORE
+# Estrutura:
+# ├── backend/   -> Python + Django
+# ├── frontend/  -> React / Next.js
+# └── mobile/    -> Flutter
+# =========================================================
+
+# =========================================================
+# SISTEMA OPERACIONAL
+# =========================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================================================
+# EDITORES / IDEs
+# =========================================================
+.vscode/
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+*~
+
+# =========================================================
+# LOGS
+# =========================================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================================================
+# ARQUIVOS DE AMBIENTE
+# =========================================================
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# =========================================================
+# PYTHON / DJANGO (backend)
+# =========================================================
+
+# Bytecode
+backend/__pycache__/
+backend/**/*.py[cod]
+backend/*$py.class
+
+# Virtual environments
+backend/venv/
+backend/.venv/
+backend/env/
+backend/.env/
+
+# Python tooling
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/.ruff_cache/
+backend/.pyre/
+backend/.hypothesis/
+backend/.tox/
+backend/.coverage
+backend/htmlcov/
+
+# Distribution / packaging
+backend/build/
+backend/dist/
+backend/*.egg-info/
+backend/.eggs/
+
+# Django
+backend/db.sqlite3
+backend/db.sqlite3-journal
+backend/media/
+backend/staticfiles/
+
+# Celery
+backend/celerybeat-schedule
+
+# PyInstaller
+backend/*.manifest
+backend/*.spec
+
+# Jupyter
+backend/.ipynb_checkpoints/
+
+# =========================================================
+# NODE / REACT / NEXT.JS (frontend)
+# =========================================================
+
+frontend/node_modules/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# React build
+frontend/build/
+frontend/dist/
+
+# Cache
+frontend/.cache/
+frontend/.turbo/
+frontend/.parcel-cache/
+
+# Package managers
+frontend/.npm/
+frontend/.pnpm-store/
+frontend/.yarn/
+frontend/.yarn-cache/
+
+# Coverage
+frontend/coverage/
+
+# TypeScript
+frontend/*.tsbuildinfo
+
+# Vercel
+frontend/.vercel/
+
+# =========================================================
+# FLUTTER (mobile)
+# =========================================================
+
+# Flutter/Dart/Pub
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub/
+mobile/.pub-cache/
+mobile/pubspec.lock
+
+# Flutter build
+mobile/build/
+
+# Generated files
+mobile/generated_plugin_registrant.dart
+
+# IDE
+mobile/.idea/
+
+# Android
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/debug/
+mobile/android/app/profile/
+mobile/android/app/release/
+
+# iOS
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/ephemeral/
+
+# macOS
+mobile/macos/Flutter/ephemeral/
+
+# Linux
+mobile/linux/flutter/ephemeral/
+
+# Windows
+mobile/windows/flutter/ephemeral/
+
+# =========================================================
+# DOCKER
+# =========================================================
+docker-compose.override.yml
+*.pid
+
+# =========================================================
+# TESTES / COBERTURA
+# =========================================================
+coverage/
+.coverage
+coverage.xml
+
+# =========================================================
+# TEMPORÁRIOS
+# =========================================================
+tmp/
+temp/
+*.tmp
+
+# =========================================================
+# SEGURANÇA
+# =========================================================
+*.pem
+*.key
+*.crt
+*.p12
+
+# =========================================================
+# BANCO DE DADOS LOCAIS
+# =========================================================
+*.sqlite3
+*.db
+
+# =========================================================
+# CACHE GERAL
+# =========================================================
+.cache/

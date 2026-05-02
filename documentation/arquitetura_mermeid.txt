@@ -1,0 +1,23 @@
+graph TD
+    subgraph "Frontend"
+        A[App Flutter - Aluno]
+        W[Next.js - Professor]
+    end
+
+    subgraph "Backend (Google Cloud Run)"
+        API[Django Ninja API]
+    end
+
+    subgraph "Armazenamento & Segurança"
+        DB[(Cloud SQL - PostgreSQL)]
+        Auth[JWT - Token Authentication]
+        Storage[Cloud Storage - Imagens/PDFs]
+    end
+
+    %% Fluxos
+    A <-->|Sincronização Offline + JWT| API
+    W <-->|Gestão + JWT| API
+    API <--> Auth
+    API <--> DB
+    API <--> Storage
+
