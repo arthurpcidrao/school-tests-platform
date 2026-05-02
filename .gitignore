@@ -135,7 +135,6 @@ mobile/.flutter-plugins-dependencies
 mobile/.packages
 mobile/.pub/
 mobile/.pub-cache/
-mobile/pubspec.lock
 
 # Flutter build
 mobile/build/
