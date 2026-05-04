@@ -47,14 +47,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'exams',
-    'rest_framework',
-    'rest_framework.authtoken',
+    'ninja_extra',
+    'ninja_jwt',
+    'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -126,6 +128,12 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Permitir credenciais e cabeçalhos necessários
+CORS_ALLOW_CREDENTIALS = True
+
 USE_TZ = True
 
 
@@ -133,3 +141,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+from datetime import timedelta
+NINJA_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+}
