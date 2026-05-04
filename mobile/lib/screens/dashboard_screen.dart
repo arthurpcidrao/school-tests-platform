@@ -19,12 +19,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EduSimulados'),
+        title: const Text('EdukSim'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final authProvider = Provider.of<AuthProvider>(
+                context,
+                listen: false,
+              );
               final navigator = Navigator.of(context);
               await authProvider.logout();
               navigator.pushReplacement(
@@ -36,10 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: IndexedStack(
         index: _currentIndex,
-        children: const [
-          SimuladosTab(),
-          DesempenhoTab(),
-        ],
+        children: const [SimuladosTab(), DesempenhoTab()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

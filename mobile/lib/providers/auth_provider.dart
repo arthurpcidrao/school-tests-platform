@@ -53,6 +53,32 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> register(String email, String password, {String role = 'ALUNO'}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.instance.register(email, password, role);
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'Falha no cadastro. Verifique os dados.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao conectar com o servidor.';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');

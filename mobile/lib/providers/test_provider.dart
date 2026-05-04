@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
+import 'dart:math';
 import '../models/exam_models.dart';
+import '../services/api_service.dart';
+import '../core/db_helper.dart';
 
 class TestProvider extends ChangeNotifier {
   bool _isLoading = false;
@@ -34,34 +38,163 @@ class TestProvider extends ChangeNotifier {
 
   String? get currentSelectedAnswer => currentQuestion != null ? _selectedAnswers[currentQuestion!.id] : null;
 
-  void startTestMock() {
+  List<Test> _assignedTests = [];
+  Map<String, bool> _downloadedStatus = {};
+
+  List<Test> get assignedTests => _assignedTests;
+
+  bool isTestDownloaded(String testId) {
+    return _downloadedStatus[testId] ?? false;
+  }
+
+  Future<void> loadAssignedTests() async {
     _isLoading = true;
     notifyListeners();
 
-    // Mock data for UI development
-    _activeTest = Test(id: '1', title: 'Cálculo Diferencial II', timePerQuestion: 120);
-    final q1 = Question(id: 'q1', stem: 'Qual é a derivada de x²?', questionType: 'FECHADA');
-    final q2 = Question(id: 'q2', stem: 'Qual é a integral de 2x?', questionType: 'FECHADA');
-    
-    _questions = [q1, q2];
-    _questionItems = {
-      'q1': [
-        Item(id: 'i1', questionId: 'q1', text: 'x', isCorrect: false),
-        Item(id: 'i2', questionId: 'q1', text: '2x', isCorrect: true),
-        Item(id: 'i3', questionId: 'q1', text: 'x²', isCorrect: false),
-        Item(id: 'i4', questionId: 'q1', text: '2', isCorrect: false),
-      ],
-      'q2': [
-        Item(id: 'i5', questionId: 'q2', text: 'x²', isCorrect: true),
-        Item(id: 'i6', questionId: 'q2', text: 'x', isCorrect: false),
-      ],
-    };
-    
-    _remainingSeconds = (_activeTest?.timePerQuestion ?? 60) * _questions.length;
-    _startTimer();
+    try {
+      final response = await ApiService.instance.fetchAssignedTests();
+      if (response.statusCode == 200) {
+        final List data = response.data;
+        _assignedTests = data.map((json) => Test.fromMap(json)).toList();
+        
+        // Verificar status de download para cada teste (apenas se não for Web)
+        if (!kIsWeb) {
+          for (var test in _assignedTests) {
+            try {
+              final isDownloaded = await DatabaseHelper.instance.isTestDownloaded(test.id);
+              _downloadedStatus[test.id] = isDownloaded;
+            } catch (e) {
+              debugPrint("Erro ao verificar SQLite: $e");
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Erro ao carregar simulados: $e");
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<bool> downloadTest(String testId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.instance.fetchFullTest(testId);
+      if (response.statusCode == 200) {
+        await DatabaseHelper.instance.saveFullTest(response.data);
+        _downloadedStatus[testId] = true;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint("Erro ao baixar simulado: $e");
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
+  Future<void> startTest(String testId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final test = await DatabaseHelper.instance.getTest(testId);
+      if (test != null) {
+        _activeTest = test;
+        _questions = await DatabaseHelper.instance.getQuestionsForTest(testId);
+        
+        _questionItems.clear();
+        for (var q in _questions) {
+          final items = await DatabaseHelper.instance.getItemsForQuestion(q.id);
+          _questionItems[q.id] = items;
+        }
+
+        final rng = Random(_activeTest!.initialSeed ?? DateTime.now().millisecondsSinceEpoch);
+        _questions.shuffle(rng);
+        for (var q in _questions) {
+          _questionItems[q.id]?.shuffle(rng);
+        }
+
+        _currentQuestionIndex = 0;
+        _selectedAnswers.clear();
+        _isBlocked = false;
+        
+        _remainingSeconds = (_activeTest?.timePerQuestion ?? 60) * _questions.length;
+        _startTimer();
+      }
+    } catch (e) {
+      debugPrint("Erro ao iniciar teste do SQLite: $e");
+    }
     
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<bool> startTestOnline(String testId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.instance.fetchFullTest(testId);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        _activeTest = Test(
+          id: data['id'],
+          title: data['title'],
+          area: data['area'],
+          timePerQuestion: data['time_per_question'],
+          initialSeed: data['initial_seed'],
+        );
+        
+        final questionsList = data['questions'] as List;
+        _questions = questionsList.map((q) => Question(
+          id: q['id'],
+          stem: q['stem'],
+          questionType: q['question_type'],
+          subject: q['subject'],
+        )).toList();
+
+        _questionItems.clear();
+        for (var q in questionsList) {
+          final itemsList = q['items'] as List;
+          _questionItems[q['id']] = itemsList.map((item) => Item(
+            id: item['id'],
+            questionId: q['id'],
+            text: item['text'],
+            isCorrect: item['is_correct'] == true,
+          )).toList();
+        }
+
+        final rng = Random(_activeTest!.initialSeed ?? DateTime.now().millisecondsSinceEpoch);
+        _questions.shuffle(rng);
+        for (var q in _questions) {
+          _questionItems[q.id]?.shuffle(rng);
+        }
+
+        _currentQuestionIndex = 0;
+        _selectedAnswers.clear();
+        _isBlocked = false;
+        
+        _remainingSeconds = (_activeTest?.timePerQuestion ?? 60) * _questions.length;
+        _startTimer();
+        
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint("Erro ao iniciar teste online: $e");
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
   }
 
   void selectAnswer(String itemId) {
@@ -93,7 +226,7 @@ class TestProvider extends ChangeNotifier {
         notifyListeners();
       } else if (_remainingSeconds <= 0) {
         _timer?.cancel();
-        _forceSubmitTest();
+        submitTest();
       }
     });
   }
@@ -115,8 +248,39 @@ class TestProvider extends ChangeNotifier {
     }
   }
 
-  void _forceSubmitTest() {
-    // TODO: Salvar StudentResponses localmente no SQLite e sync com API
+  void finishTest() {
+    _timer?.cancel();
+    _isBlocked = true;
+    notifyListeners();
+  }
+
+  Future<bool> submitTest() async {
+    if (_activeTest == null) return false;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final answers = _selectedAnswers.entries.map((e) => {
+        'question_id': e.key,
+        'item_id': e.value,
+      }).toList();
+      
+      final res = await ApiService.instance.submitAttempt(_activeTest!.id, answers);
+      if (res.statusCode == 201) {
+        _activeTest = null;
+        _isLoading = false;
+        notifyListeners();
+        // Recarregar simulados disponíveis para remover o recém-finalizado
+        loadAssignedTests();
+        return true;
+      }
+    } catch (e) {
+      debugPrint("Erro submitTest: $e");
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
   }
 
   @override

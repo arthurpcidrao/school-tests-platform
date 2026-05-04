@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../core/app_theme.dart';
+import '../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,9 +16,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  void _handleRegister() {
-    // TODO: Connect to AuthProvider
-    // Role will be hardcoded to 'ALUNO'
+  Future<void> _handleRegister() async {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos obrigatórios')),
+      );
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.register(email, password, role: 'ALUNO');
+
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cadastro realizado! Faça login para continuar.'),
+        ),
+      );
+      Navigator.of(context).pop();
+    } else if (mounted && authProvider.errorMessage != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
+    }
   }
 
   @override
@@ -46,15 +71,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Text(
                       'Criar Conta',
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            color: AppTheme.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               Text(
                 'Cadastre-se como Aluno',
                 style: Theme.of(context).textTheme.displayMedium,
@@ -63,9 +88,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 8),
               Text(
                 'Preencha os dados abaixo para ter acesso aos simulados da sua escola.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -73,9 +98,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Formulário
               Text(
                 'E-MAIL INSTITUCIONAL',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -83,16 +108,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'nome@escola.com.br',
-                  prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
 
               Text(
                 'TELEFONE (OPCIONAL)',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -100,16 +128,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   hintText: '(11) 99999-9999',
-                  prefixIcon: const Icon(Icons.phone_outlined, color: AppTheme.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.phone_outlined,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
 
               Text(
                 'SENHA',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -117,10 +148,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   hintText: '••••••••',
-                  prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: AppTheme.textSecondary,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: AppTheme.textSecondary,
                     ),
                     onPressed: () {
@@ -133,18 +169,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 32),
 
-              ElevatedButton(
-                onPressed: _handleRegister,
-                child: const Text('Cadastrar como Aluno'),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return ElevatedButton(
+                    onPressed: auth.isLoading ? null : _handleRegister,
+                    child: auth.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Cadastrar como Aluno'),
+                  );
+                },
               ),
               const SizedBox(height: 16),
-              
+
               Text(
                 'Ao se cadastrar, você concorda com nossos Termos de Serviço e Política de Privacidade.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontSize: 10,
-                  height: 1.5,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontSize: 10, height: 1.5),
                 textAlign: TextAlign.center,
               ),
             ],

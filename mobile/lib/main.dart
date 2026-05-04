@@ -3,23 +3,25 @@ import 'package:provider/provider.dart';
 import 'core/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'providers/auth_provider.dart';
+import 'providers/test_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const EduSimuladosApp());
+  runApp(const EdukSimApp());
 }
 
-class EduSimuladosApp extends StatelessWidget {
-  const EduSimuladosApp({super.key});
+class EdukSimApp extends StatelessWidget {
+  const EdukSimApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => TestProvider()),
       ],
       child: MaterialApp(
-        title: 'EduSimulados',
+        title: 'EdukSim',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: const LoginScreen(),

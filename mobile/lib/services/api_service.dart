@@ -1,13 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   static final ApiService instance = ApiService._init();
   late Dio _dio;
 
   ApiService._init() {
+    final String baseUrl = kIsWeb ? 'http://localhost:8000/api/' : 'http://10.0.2.2:8000/api/';
     _dio = Dio(BaseOptions(
-      baseUrl: 'http://10.0.2.2:8000/api/', // Emulator localhost
+      baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -35,17 +37,36 @@ class ApiService {
   Dio get client => _dio;
 
   Future<Response> login(String email, String password) async {
-    return await _dio.post('token/', data: {
+    return await _dio.post('auth/login', data: {
       'email': email,
       'password': password,
     });
   }
 
-  Future<Response> fetchAvailableExams() async {
-    return await _dio.get('tests/'); // O endpoint correto precisa ser ajustado baseado nas urls.py
+  Future<Response> register(String email, String password, String role) async {
+    return await _dio.post('auth/register', data: {
+      'email': email,
+      'password': password,
+      'role': role,
+    });
   }
 
-  Future<Response> syncTestAttempts(List<Map<String, dynamic>> attempts) async {
-    return await _dio.post('sync-attempts/', data: attempts);
+  Future<Response> fetchAssignedTests() async {
+    return await _dio.get('exams/tests/assigned');
+  }
+
+  Future<Response> fetchFullTest(String testId) async {
+    return await _dio.get('exams/tests/$testId/full');
+  }
+
+  Future<Response> submitAttempt(String testId, List<Map<String, String>> answers) async {
+    return await _dio.post('exams/attempts', data: {
+      'test_id': testId,
+      'answers': answers,
+    });
+  }
+
+  Future<Response> fetchMyAttempts() async {
+    return await _dio.get('exams/attempts/my');
   }
 }

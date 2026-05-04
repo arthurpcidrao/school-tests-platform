@@ -23,9 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preencha todos os campos')));
       return;
     }
 
@@ -37,9 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     } else if (mounted && authProvider.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authProvider.errorMessage!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(authProvider.errorMessage!)));
     }
   }
 
@@ -61,17 +61,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     Icon(Icons.school, size: 48, color: AppTheme.primary),
                     const SizedBox(height: 12),
                     Text(
-                      'EduSimulados',
+                      'EdukSim',
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            color: AppTheme.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 48),
-              
+
               Text(
                 'Bem-vindo de volta',
                 style: Theme.of(context).textTheme.displayMedium,
@@ -80,9 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 8),
               Text(
                 'Entre com suas credenciais para acessar o portal.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -90,9 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
               // Formulário
               Text(
                 'E-MAIL INSTITUCIONAL',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -100,7 +100,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'nome@escola.com.br',
-                  prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -111,17 +114,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'SENHA',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   TextButton(
                     onPressed: () {},
                     child: Text(
                       'Esqueceu a senha?',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
@@ -131,10 +134,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   hintText: '••••••••',
-                  prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: AppTheme.textSecondary,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: AppTheme.textSecondary,
                     ),
                     onPressed: () {
@@ -166,8 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Lembrar neste dispositivo',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -177,11 +185,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 builder: (context, auth, child) {
                   return ElevatedButton(
                     onPressed: auth.isLoading ? null : _handleLogin,
-                    child: auth.isLoading 
+                    child: auth.isLoading
                         ? const SizedBox(
-                            height: 20, 
-                            width: 20, 
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
                           )
                         : const Text('Entrar no Sistema'),
                   );
@@ -197,8 +208,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       'OU',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppTheme.textSecondary,
-                          ),
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                   ),
                   const Expanded(child: Divider()),
@@ -208,7 +219,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
               OutlinedButton.icon(
                 onPressed: () {},
-                icon: const Icon(Icons.g_mobiledata, size: 24, color: AppTheme.textPrimary),
+                icon: const Icon(
+                  Icons.g_mobiledata,
+                  size: 24,
+                  color: AppTheme.textPrimary,
+                ),
                 label: const Text('Entrar com Google'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.textPrimary,
@@ -225,8 +240,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Não tem uma conta? ',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                        ),
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   TextButton(
                     onPressed: () {
@@ -244,9 +259,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       'Cadastre-se como aluno',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppTheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],

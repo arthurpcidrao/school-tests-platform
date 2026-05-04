@@ -1,77 +1,88 @@
 import 'package:flutter/material.dart';
-import '../core/app_theme.dart';
+import '../../core/app_theme.dart';
+import '../../services/api_service.dart';
+import 'package:intl/intl.dart';
 
 class DesempenhoTab extends StatelessWidget {
   const DesempenhoTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        const SizedBox(height: 8),
-        Row(
+    return FutureBuilder(
+      future: ApiService.instance.fetchMyAttempts(),
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final List attempts = snapshot.hasData && snapshot.data.statusCode == 200 
+            ? snapshot.data.data 
+            : [];
+
+        return ListView(
+          padding: const EdgeInsets.all(16.0),
           children: [
-            Expanded(
-              child: Text('Histórico de Desempenho', style: Theme.of(context).textTheme.displayMedium),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Text('Histórico de Desempenho', style: Theme.of(context).textTheme.displayMedium),
+                ),
+                const Icon(Icons.history, color: AppTheme.textSecondary),
+              ],
             ),
-            const Icon(Icons.history, color: AppTheme.textSecondary),
-          ],
-        ),
-        const SizedBox(height: 24),
-        _buildHistoryItem(
-          context,
-          'Biologia Celular - Módulo 1',
-          'Finalizado em 12 Out',
-          '85%',
-          '34/40',
-          AppTheme.success,
-          Icons.check_circle,
-        ),
-        const SizedBox(height: 12),
-        _buildHistoryItem(
-          context,
-          'Química Orgânica - Reações',
-          'Finalizado em 10 Out',
-          '62%',
-          '15/25',
-          AppTheme.warning,
-          Icons.error,
-        ),
-        const SizedBox(height: 32),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF00409f), // on-primary-fixed-variant from HTML
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primary.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
+            const SizedBox(height: 24),
+            if (attempts.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Text(
+                    'Nenhum histórico disponível ainda. Faça seu primeiro simulado!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
               )
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Reforço Necessário',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.white),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Baseado nos seus erros recentes, foque nestes temas:',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white.withOpacity(0.8)),
-              ),
-              const SizedBox(height: 16),
-              _buildReforcoItem(context, 'Física', 'Leis de Newton', AppTheme.warning, Icons.lightbulb),
-              const SizedBox(height: 8),
-              _buildReforcoItem(context, 'História', 'Brasil Colônia', const Color(0xFF6bd3fd), Icons.psychology),
-            ],
-          ),
-        ),
-      ],
+            else
+              ...attempts.map((att) {
+                final score = att['score_percentage'] as num;
+                final correct = att['correct_count'];
+                final total = att['total_count'];
+                final dateStr = att['finished_at'];
+                
+                String dateFormatted = '';
+                if (dateStr != null) {
+                  try {
+                    dateFormatted = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(dateStr));
+                  } catch (_) {}
+                }
+
+                Color color = AppTheme.success;
+                IconData icon = Icons.check_circle_outline;
+                if (score < 50) {
+                  color = AppTheme.danger;
+                  icon = Icons.cancel_outlined;
+                } else if (score < 70) {
+                  color = AppTheme.warning;
+                  icon = Icons.info_outline;
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _buildHistoryItem(
+                    context, 
+                    att['test_title'], 
+                    dateFormatted, 
+                    '${score.toStringAsFixed(1)}%', 
+                    '$correct / $total', 
+                    color, 
+                    icon
+                  ),
+                );
+              }).toList(),
+          ],
+        );
+      }
     );
   }
 
