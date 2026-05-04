@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "EduSimulados | Avaliação Escolar com Inteligência Artificial",
+  title: "EdukSim | Avaliação Escolar com Inteligência Artificial",
   description: "Plataforma definitiva para gestão de avaliações, análise de desempenho e excelência acadêmica.",
 };
 

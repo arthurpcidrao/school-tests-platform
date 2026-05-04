@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -18,15 +18,78 @@ interface Question {
   weight: number;
 }
 
+interface Student {
+  id: string;
+  email: string;
+}
+
 export default function CreateTestPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("eduksim_token");
+    if (!token) {
+      router.push("/login");
+    }
+  }, [router]);
+
   const [title, setTitle] = useState("");
   const [area, setArea] = useState("Matemática");
   const [description, setDescription] = useState("");
   const [timePerQuestion, setTimePerQuestion] = useState("");
-  
+
   const [questions, setQuestions] = useState<Question[]>([]);
-  
+  const [students, setStudents] = useState<Student[]>([]);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+
+  // Bank Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bankQuestions, setBankQuestions] = useState<Question[]>([]);
+  const [selectedBankQuestions, setSelectedBankQuestions] = useState<Question[]>([]);
+
+  // Student Dropdown State
+  const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const token = localStorage.getItem("eduksim_token");
+      if (!token) return;
+      try {
+        const res = await fetch("http://localhost:8000/api/auth/students", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) setStudents(await res.json());
+      } catch (err) { console.error(err); }
+    };
+    fetchStudents();
+  }, []);
+
+  const openBankModal = async () => {
+    const token = localStorage.getItem("eduksim_token");
+    if (!token) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/exams/questions?subject=${encodeURIComponent(area)}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setBankQuestions(await res.json());
+        setIsModalOpen(true);
+        setSelectedBankQuestions([]);
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const addQuestionsFromBank = () => {
+    // Para cada questão selecionada, defina o peso padrão 1.0 e insira
+    const newQs = selectedBankQuestions.map(q => ({
+      ...q,
+      weight: 1.0
+    }));
+    setQuestions([...questions, ...newQs]);
+    setIsModalOpen(false);
+  };
+
+
   // Editor State
   const [qSubject, setQSubject] = useState("Matemática");
   const [qStem, setQStem] = useState("");
@@ -59,7 +122,7 @@ export default function CreateTestPage() {
 
   const handleSaveQuestion = () => {
     if (!qStem.trim()) return alert("O enunciado não pode ser vazio.");
-    
+
     setQuestions([...questions, {
       subject: area, // Using the main area for simplicity
       stem: qStem,
@@ -67,7 +130,7 @@ export default function CreateTestPage() {
       items: qType === "FECHADA" ? qItems : [],
       weight: qWeight
     }]);
-    
+
     // Reset editor
     setQStem("");
     setQItems([{ text: "", is_correct: true }, { text: "", is_correct: false }]);
@@ -81,27 +144,35 @@ export default function CreateTestPage() {
       const testQuestions = [];
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i];
-        const resQ = await fetch("http://localhost:8000/api/exams/questions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            subject: q.subject,
-            content: "",
-            stem: q.stem,
-            question_type: q.question_type,
-            items: q.items
-          })
-        });
-        
-        if (resQ.ok) {
-          const qData = await resQ.json();
+        let qId = q.id;
+
+        if (!qId) {
+          const resQ = await fetch("http://localhost:8000/api/exams/questions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              subject: q.subject,
+              content: "",
+              stem: q.stem,
+              question_type: q.question_type,
+              items: q.items
+            })
+          });
+
+          if (resQ.ok) {
+            const qData = await resQ.json();
+            qId = qData.id;
+          }
+        }
+
+        if (qId) {
           testQuestions.push({
-            question_id: qData.id,
+            question_id: qId,
             order_index: i,
-            weight: q.weight
+            weight: q.weight || 1
           });
         }
       }
@@ -116,6 +187,7 @@ export default function CreateTestPage() {
           title,
           area,
           time_per_question: timePerQuestion ? parseInt(timePerQuestion) : null,
+          allowed_students: selectedStudents,
           questions: testQuestions
         })
       });
@@ -134,7 +206,7 @@ export default function CreateTestPage() {
       {/* TopNavBar */}
       <header className="bg-white border-b border-slate-200 shadow-sm top-0 z-50 flex justify-between items-center h-16 px-6 w-full flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-xl font-bold tracking-tight text-blue-600 font-lexend hover:opacity-80">EduSimulados</Link>
+          <Link href="/dashboard" className="text-xl font-bold tracking-tight text-blue-600 font-lexend hover:opacity-80">EdukSim</Link>
           <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block"></div>
           <nav className="hidden md:flex gap-6">
             <Link className="text-slate-500 font-lexend text-sm font-medium hover:bg-slate-50 transition-colors px-3 py-2 rounded-lg" href="/dashboard">Painel</Link>
@@ -157,15 +229,15 @@ export default function CreateTestPage() {
           <div className="text-center mb-2">
             <span className="text-[10px] font-lexend font-bold text-slate-400 uppercase">NAV. Q.</span>
           </div>
-          
+
           {questions.map((q, idx) => (
             <div key={idx} className="flex flex-col items-center group relative">
               <button className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-lexend text-xs font-bold shadow-md">
-                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
               </button>
               <div className="text-[10px] mt-1 text-blue-600 font-bold">Q{idx + 1}</div>
               {/* Opção para remover */}
-              <button 
+              <button
                 onClick={() => setQuestions(questions.filter((_, i) => i !== idx))}
                 className="absolute left-12 top-0 bg-danger text-white rounded-full w-6 h-6 hidden group-hover:flex items-center justify-center shadow-sm"
               >
@@ -195,9 +267,9 @@ export default function CreateTestPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                 <div className="space-y-xs">
                   <label className="font-label-caps text-label-caps text-text-secondary uppercase">Nome do Simulado</label>
-                  <input 
-                    className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" 
-                    placeholder="ex: Matemática Bimestral - 2024" 
+                  <input
+                    className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                    placeholder="ex: Matemática Bimestral - 2026"
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
@@ -205,7 +277,7 @@ export default function CreateTestPage() {
                 </div>
                 <div className="space-y-xs">
                   <label className="font-label-caps text-label-caps text-text-secondary uppercase">Área / Disciplina</label>
-                  <select 
+                  <select
                     className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none transition-all bg-white"
                     value={area}
                     onChange={(e) => setArea(e.target.value)}
@@ -220,9 +292,9 @@ export default function CreateTestPage() {
                 </div>
                 <div className="col-span-full space-y-xs">
                   <label className="font-label-caps text-label-caps text-text-secondary uppercase">Descrição</label>
-                  <textarea 
-                    className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" 
-                    placeholder="Descreva brevemente os objetivos deste simulado..." 
+                  <textarea
+                    className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                    placeholder="Descreva brevemente os objetivos deste simulado..."
                     rows={2}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -240,11 +312,14 @@ export default function CreateTestPage() {
                   </div>
                   <div>
                     <h2 className="font-h2 text-h2 text-text-primary">Editor de Questões</h2>
-                    <p className="text-body-sm text-text-secondary font-body-sm">Configure o enunciado e as alternativas</p>
+                    <p className="text-body-sm text-text-secondary font-body-sm">Configure o enunciado e as alternativas ou busque do banco</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <span className="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-xs font-bold uppercase tracking-wider">RASCUNHO</span>
+                  <button onClick={openBankModal} className="px-3 py-1 bg-primary text-white rounded-lg text-xs font-bold shadow hover:bg-primary/90 flex items-center gap-1 transition-colors">
+                    <span className="material-symbols-outlined text-[14px]">search</span> Buscar do Banco
+                  </button>
+                  <span className="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-xs font-bold uppercase tracking-wider flex items-center">RASCUNHO</span>
                 </div>
               </div>
 
@@ -259,9 +334,9 @@ export default function CreateTestPage() {
                       <button className="p-1 hover:bg-white rounded transition-colors"><span className="material-symbols-outlined text-[20px]">image</span></button>
                       <button className="p-1 hover:bg-white rounded transition-colors"><span className="material-symbols-outlined text-[20px]">functions</span></button>
                     </div>
-                    <textarea 
-                      className="w-full px-4 py-3 border-none focus:ring-0 outline-none transition-all" 
-                      placeholder="Digite o conteúdo da questão aqui..." 
+                    <textarea
+                      className="w-full px-4 py-3 border-none focus:ring-0 outline-none transition-all"
+                      placeholder="Digite o conteúdo da questão aqui..."
                       rows={4}
                       value={qStem}
                       onChange={(e) => setQStem(e.target.value)}
@@ -274,13 +349,13 @@ export default function CreateTestPage() {
                   <div className="space-y-xs">
                     <label className="font-label-caps text-label-caps text-text-secondary uppercase">Tipo de Questão</label>
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={() => setQType("FECHADA")}
                         className={`flex-1 py-3 px-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors ${qType === "FECHADA" ? "border-2 border-primary bg-primary-container/10 text-primary" : "border border-border text-text-secondary hover:border-primary"}`}
                       >
                         <span className="material-symbols-outlined">checklist</span> Múltipla Escolha
                       </button>
-                      <button 
+                      <button
                         onClick={() => setQType("ABERTA")}
                         className={`flex-1 py-3 px-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors ${qType === "ABERTA" ? "border-2 border-primary bg-primary-container/10 text-primary" : "border border-border text-text-secondary hover:border-primary"}`}
                       >
@@ -291,10 +366,10 @@ export default function CreateTestPage() {
                   <div className="space-y-xs">
                     <label className="font-label-caps text-label-caps text-text-secondary uppercase">Peso (Pontos)</label>
                     <div className="flex items-center border border-border rounded-lg overflow-hidden">
-                      <input 
-                        className="w-full px-4 py-3 border-none focus:ring-0 outline-none" 
-                        step="0.1" 
-                        type="number" 
+                      <input
+                        className="w-full px-4 py-3 border-none focus:ring-0 outline-none"
+                        step="0.1"
+                        type="number"
                         value={qWeight}
                         onChange={(e) => setQWeight(parseFloat(e.target.value))}
                       />
@@ -312,15 +387,15 @@ export default function CreateTestPage() {
                     <div className="space-y-2">
                       {qItems.map((item, idx) => (
                         <div key={idx} className={`flex items-center gap-3 bg-surface p-3 rounded-lg border shadow-sm transition-colors ${item.is_correct ? "border-success" : "border-border"}`}>
-                          <div 
+                          <div
                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer flex-shrink-0 ${item.is_correct ? "border-success" : "border-border"}`}
                             onClick={() => handleSetCorrect(idx)}
                           >
                             {item.is_correct && <div className="w-3 h-3 rounded-full bg-success"></div>}
                           </div>
-                          <input 
-                            className="flex-1 bg-transparent border-none focus:ring-0 p-0 text-body-md font-body-md outline-none" 
-                            type="text" 
+                          <input
+                            className="flex-1 bg-transparent border-none focus:ring-0 p-0 text-body-md font-body-md outline-none"
+                            type="text"
                             placeholder={`Alternativa ${idx + 1}`}
                             value={item.text}
                             onChange={(e) => handleUpdateItem(idx, e.target.value)}
@@ -340,7 +415,7 @@ export default function CreateTestPage() {
                     setQStem("");
                     setQItems([{ text: "", is_correct: true }, { text: "", is_correct: false }]);
                   }}>Limpar</button>
-                  <button 
+                  <button
                     className="px-8 py-3 font-button text-button bg-primary text-on-primary rounded-lg shadow-md hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
                     onClick={handleSaveQuestion}
                     disabled={!qStem.trim()}
@@ -364,8 +439,8 @@ export default function CreateTestPage() {
                 <label className="font-label-caps text-label-caps text-text-secondary uppercase">Tempo Limite</label>
                 <div className="flex items-center gap-3 bg-surface-container-low p-3 rounded-lg border border-border">
                   <span className="material-symbols-outlined text-text-secondary">timer</span>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     className="bg-transparent border-none outline-none w-16 text-body-md font-semibold focus:ring-0 p-0"
                     placeholder="120"
                     value={timePerQuestion}
@@ -376,43 +451,74 @@ export default function CreateTestPage() {
               </div>
             </div>
           </div>
-          
+
           <hr className="border-slate-100" />
-          
+
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="font-h3 text-h3 text-text-primary">Atribuir a</h3>
-              <span className="text-xs text-primary font-bold bg-primary/10 px-2 py-1 rounded-full">Turmas</span>
+              <h3 className="font-h3 text-h3 text-text-primary">Atribuir a Alunos</h3>
+              <span className="text-xs text-primary font-bold bg-primary/10 px-2 py-1 rounded-full">{selectedStudents.length} selecionados</span>
             </div>
+            
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">search</span>
-              <input className="w-full pl-10 pr-4 py-2 border border-border rounded-lg text-body-sm focus:ring-1 focus:ring-primary outline-none" placeholder="Buscar turmas ou alunos..." type="text"/>
-            </div>
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-slate-50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center font-bold text-slate-500 text-xs">3A</div>
-                  <span className="text-body-sm font-medium">Turma 3A - Ciências</span>
-                </div>
-                <input type="checkbox" defaultChecked className="rounded border-border text-primary focus:ring-primary" />
+              {/* Dropdown Header (Select Style) */}
+              <div 
+                className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-white flex justify-between items-center cursor-pointer"
+                onClick={() => setIsStudentDropdownOpen(!isStudentDropdownOpen)}
+              >
+                <span className="text-body-sm text-text-primary truncate">
+                  {selectedStudents.length === 0 
+                    ? "Selecione os alunos..." 
+                    : selectedStudents.length === 1 
+                      ? selectedStudents[0] 
+                      : `${selectedStudents.length} alunos selecionados`}
+                </span>
+                <span className="material-symbols-outlined text-slate-400">expand_more</span>
               </div>
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-slate-50 cursor-pointer transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center font-bold text-slate-500 text-xs">3B</div>
-                  <span className="text-body-sm font-medium">Turma 3B - Ciências</span>
+
+              {/* Dropdown List */}
+              {isStudentDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-xl z-50 max-h-[300px] flex flex-col">
+                  <div className="p-2 border-b border-border">
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-2 top-2 text-slate-400 text-[18px]">search</span>
+                      <input 
+                        className="w-full pl-8 pr-3 py-1.5 border border-border rounded-md text-sm focus:ring-1 focus:ring-primary outline-none" 
+                        placeholder="Buscar aluno..." 
+                        type="text" 
+                      />
+                    </div>
+                  </div>
+                  <div className="overflow-y-auto p-2 space-y-1">
+                    {students.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-4">Nenhum aluno carregado.</p>
+                    ) : (
+                      students.map(s => (
+                        <div 
+                          key={s.id} 
+                          onClick={() => {
+                            setSelectedStudents(prev => prev.includes(s.email) ? prev.filter(e => e !== s.email) : [...prev, s.email])
+                          }} 
+                          className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50 cursor-pointer transition-colors"
+                        >
+                          <span className="text-sm font-medium text-text-primary line-clamp-1">{s.email}</span>
+                          <input type="checkbox" checked={selectedStudents.includes(s.email)} readOnly className="rounded border-border text-primary focus:ring-primary pointer-events-none" />
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-                <input type="checkbox" className="rounded border-border text-primary focus:ring-primary" />
-              </div>
+              )}
             </div>
           </div>
-          
+
           <div className="mt-auto pt-6 border-t border-border">
-            <button 
+            <button
               className="w-full py-4 bg-primary text-on-primary rounded-xl font-h3 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               onClick={handleSaveTest}
               disabled={questions.length === 0 || !title.trim()}
             >
-              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>rocket_launch</span> Publicar Simulado
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span> Publicar Simulado
             </button>
             <p className="text-[11px] text-center text-text-secondary mt-3">Agendado para ser liberado após a criação.</p>
           </div>
@@ -420,7 +526,7 @@ export default function CreateTestPage() {
 
         {/* Mobile Submit Button (Fallback) */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-50">
-          <button 
+          <button
             className="w-full py-3 bg-primary text-on-primary rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
             onClick={handleSaveTest}
             disabled={questions.length === 0 || !title.trim()}
@@ -429,6 +535,47 @@ export default function CreateTestPage() {
           </button>
         </div>
       </div>
+
+      {/* Modal do Banco de Questões */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div className="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-xl">
+              <h2 className="font-bold text-lg">Banco de Questões: {area}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-danger"><span className="material-symbols-outlined">close</span></button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1 space-y-3">
+              {bankQuestions.length === 0 ? (
+                <p className="text-center text-slate-500 py-10">Nenhuma questão encontrada para {area}.</p>
+              ) : (
+                bankQuestions.map(bq => (
+                  <div key={bq.id} className="border p-3 rounded-lg flex items-start gap-3 hover:bg-slate-50">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={selectedBankQuestions.some(q => q.id === bq.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedBankQuestions([...selectedBankQuestions, bq]);
+                        else setSelectedBankQuestions(selectedBankQuestions.filter(q => q.id !== bq.id));
+                      }}
+                    />
+                    <div>
+                      <p className="text-sm font-medium line-clamp-2">{bq.stem}</p>
+                      <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600 mt-1 inline-block">{bq.question_type}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="p-4 border-t flex justify-end gap-2 bg-slate-50 rounded-b-xl">
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded text-slate-600 hover:bg-slate-200 font-bold text-sm">Cancelar</button>
+              <button onClick={addQuestionsFromBank} className="px-4 py-2 rounded bg-primary text-white font-bold text-sm hover:bg-primary/90">
+                Adicionar ({selectedBankQuestions.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

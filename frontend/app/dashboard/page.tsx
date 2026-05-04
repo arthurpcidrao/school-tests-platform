@@ -10,8 +10,14 @@ interface Test {
   area: string | null;
 }
 
+interface DashboardStats {
+  active_students: int;
+  recent_tests: Test[];
+  top_students: { email: string; score: number }[];
+}
+
 export default function DashboardPage() {
-  const [tests, setTests] = useState<Test[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,14 +29,14 @@ export default function DashboardPage() {
       }
 
       try {
-        const res = await fetch("http://localhost:8000/api/exams/tests", {
+        const res = await fetch("http://localhost:8000/api/exams/dashboard-stats", {
           headers: {
             "Authorization": `Bearer ${token}`
           }
         });
         if (res.ok) {
           const data = await res.json();
-          setTests(data);
+          setStats(data);
         } else if (res.status === 401) {
           router.push("/login");
         }
@@ -55,8 +61,8 @@ export default function DashboardPage() {
             <span className="material-symbols-outlined">school</span>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-slate-900 font-lexend leading-tight">Painel Admin</h1>
-            <p className="text-xs text-slate-500 font-lexend">Ano Letivo 2024</p>
+            <h1 className="text-lg font-semibold text-slate-900 font-lexend leading-tight">Painel do Professor</h1>
+            <p className="text-xs text-slate-500 font-lexend">Ano Letivo 2026</p>
           </div>
         </div>
         <nav className="flex-1 space-y-1">
@@ -67,7 +73,7 @@ export default function DashboardPage() {
           <Link className="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#">
             <span className="material-symbols-outlined">description</span> Simulados
           </Link>
-          <Link className="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#">
+          <Link className="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="/dashboard/create-question">
             <span className="material-symbols-outlined">database</span> Banco de Questões
           </Link>
           <Link className="text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg px-4 py-2 flex items-center gap-3 transition-all duration-200 ease-in-out font-lexend text-sm" href="#">
@@ -93,11 +99,11 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4 flex-1">
             <div className="relative w-full max-w-[448px] hidden md:block">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-              <input className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none outline-none rounded-xl focus:ring-2 focus:ring-primary-container text-sm font-body-md" placeholder="Pesquisar por simulados ou alunos..." type="text"/>
+              <input className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none outline-none rounded-xl focus:ring-2 focus:ring-primary-container text-sm font-body-md" placeholder="Pesquisar por simulados ou alunos..." type="text" />
             </div>
             <div className="md:hidden flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">school</span>
-              <span className="font-bold font-lexend">EduSimulados</span>
+              <span className="font-bold font-lexend">EdukSim</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -113,7 +119,7 @@ export default function DashboardPage() {
                 <p className="text-sm font-semibold font-lexend">Prof. Ricardo Silva</p>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Matemática</p>
               </div>
-              <img alt="User profile avatar" className="w-10 h-10 object-cover rounded-full border-2 border-primary-fixed" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_3l2_7FhEfkp3DgKB1D4ywGAiw0S5vZggqnokbtkyejSBZ3X_BJgHLy12ZtP9AMIDP_KyLWaUzS1LZttPBv56Go_-sr7lOIE9EyFOVBzmOmE6PM9ywLXfvBTkAunwVc1Z6amiSzDKmFzgH6tPNX4njTI7HCD1e1Hr5-GVlw80xwTxFwKdIqX02MQ-TBfeTbhQPbo4UPzUVtiZfOgGCxY5mO3e8LL3pFKKY7E15tfkBW7sGUYpvJ-fUoDTfbH9GrUNBvnZzC-K5xIr"/>
+              <img alt="User profile avatar" className="w-10 h-10 object-cover rounded-full border-2 border-primary-fixed" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_3l2_7FhEfkp3DgKB1D4ywGAiw0S5vZggqnokbtkyejSBZ3X_BJgHLy12ZtP9AMIDP_KyLWaUzS1LZttPBv56Go_-sr7lOIE9EyFOVBzmOmE6PM9ywLXfvBTkAunwVc1Z6amiSzDKmFzgH6tPNX4njTI7HCD1e1Hr5-GVlw80xwTxFwKdIqX02MQ-TBfeTbhQPbo4UPzUVtiZfOgGCxY5mO3e8LL3pFKKY7E15tfkBW7sGUYpvJ-fUoDTfbH9GrUNBvnZzC-K5xIr" />
             </div>
           </div>
         </header>
@@ -146,10 +152,10 @@ export default function DashboardPage() {
                 </div>
                 <div className="mt-4">
                   <p className="text-text-secondary font-label-caps text-label-caps">ALUNOS ATIVOS</p>
-                  <h3 className="font-h2 text-h2 mt-1">1,284</h3>
+                  <h3 className="font-h2 text-h2 mt-1">{stats?.active_students || 0}</h3>
                 </div>
               </div>
-              
+
               {/* Stat 2 */}
               <div className="bg-surface p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between">
                 <div className="flex justify-between items-start">
@@ -165,7 +171,7 @@ export default function DashboardPage() {
                   <h3 className="font-h2 text-h2 mt-1">78.4%</h3>
                 </div>
               </div>
-              
+
               {/* Stat 3 */}
               <div className="bg-surface p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between">
                 <div className="flex justify-between items-start">
@@ -175,11 +181,11 @@ export default function DashboardPage() {
                   <span className="text-text-secondary text-xs font-bold font-lexend">Target: 85%</span>
                 </div>
                 <div className="mt-4">
-                  <p className="text-text-secondary font-label-caps text-label-caps">SIMULADOS CRIADOS</p>
-                  <h3 className="font-h2 text-h2 mt-1">{tests.length}</h3>
+                  <p className="text-text-secondary font-label-caps text-label-caps">SIMULADOS RECENTES</p>
+                  <h3 className="font-h2 text-h2 mt-1">{stats?.recent_tests.length || 0}</h3>
                 </div>
               </div>
-              
+
               {/* Stat 4 */}
               <div className="bg-surface p-6 rounded-xl border border-border shadow-sm flex flex-col justify-between">
                 <div className="flex justify-between items-start">
@@ -235,14 +241,14 @@ export default function DashboardPage() {
                   <Link className="text-primary text-xs font-bold hover:underline" href="#">Ver Todos</Link>
                 </div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[350px]">
-                  {tests.length === 0 ? (
-                     <div className="text-center py-10 text-muted-foreground">
-                       <span className="material-symbols-outlined opacity-50 mb-2">menu_book</span>
-                       <p className="text-sm">Nenhum simulado criado.</p>
-                     </div>
+                  {!stats?.recent_tests || stats.recent_tests.length === 0 ? (
+                    <div className="text-center py-10 text-muted-foreground">
+                      <span className="material-symbols-outlined opacity-50 mb-2">menu_book</span>
+                      <p className="text-sm">Nenhum simulado criado.</p>
+                    </div>
                   ) : (
-                    tests.map((test) => (
-                      <div key={test.id} className="p-4 rounded-xl border border-slate-100 hover:border-primary/30 transition-colors bg-surface-container-low/30 group">
+                    stats.recent_tests.map((test) => (
+                      <Link href={`/dashboard/tests/${test.id}`} key={test.id} className="block p-4 rounded-xl border border-slate-100 hover:border-primary/30 transition-colors bg-surface-container-low/30 group">
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="font-bold text-sm text-on-surface line-clamp-1">{test.title}</h4>
                           <span className="px-2 py-1 bg-success/10 text-success text-[10px] font-bold rounded-full whitespace-nowrap">ATIVO</span>
@@ -256,7 +262,7 @@ export default function DashboardPage() {
                             <div className="bg-primary h-full w-[45%]"></div>
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     ))
                   )}
                 </div>
@@ -281,51 +287,34 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                      <tr className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-xs">AM</div>
-                            <span className="text-sm font-semibold whitespace-nowrap">Ana Martins</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-text-secondary whitespace-nowrap">Simulado Geral</td>
-                        <td className="px-6 py-4"><span className="text-sm font-bold text-success">9.8</span></td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="text-primary hover:bg-blue-50 p-1 rounded-md">
-                            <span className="material-symbols-outlined text-lg">chevron_right</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs">BL</div>
-                            <span className="text-sm font-semibold whitespace-nowrap">Bruno Lima</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-text-secondary whitespace-nowrap">Simulado Geral</td>
-                        <td className="px-6 py-4"><span className="text-sm font-bold text-success">9.5</span></td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="text-primary hover:bg-blue-50 p-1 rounded-md">
-                            <span className="material-symbols-outlined text-lg">chevron_right</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">CS</div>
-                            <span className="text-sm font-semibold whitespace-nowrap">Carla Souza</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-text-secondary whitespace-nowrap">Trigonometria</td>
-                        <td className="px-6 py-4"><span className="text-sm font-bold text-success">9.2</span></td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="text-primary hover:bg-blue-50 p-1 rounded-md">
-                            <span className="material-symbols-outlined text-lg">chevron_right</span>
-                          </button>
-                        </td>
-                      </tr>
+                      {!stats?.top_students || stats.top_students.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-10 text-center text-text-secondary text-sm">
+                            <span className="material-symbols-outlined opacity-50 block text-3xl mb-2">analytics</span>
+                            Ainda não há alunos que finalizaram simulados.
+                          </td>
+                        </tr>
+                      ) : (
+                        stats.top_students.map((student, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-xs">
+                                  {student.email.substring(0, 2).toUpperCase()}
+                                </div>
+                                <span className="text-sm font-semibold whitespace-nowrap">{student.email}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-xs text-text-secondary whitespace-nowrap">Último Simulado</td>
+                            <td className="px-6 py-4"><span className="text-sm font-bold text-success">{student.score.toFixed(1)}</span></td>
+                            <td className="px-6 py-4 text-right">
+                              <button className="text-primary hover:bg-blue-50 p-1 rounded-md">
+                                <span className="material-symbols-outlined text-lg">chevron_right</span>
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -344,10 +333,13 @@ export default function DashboardPage() {
                     <span className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">Química (398)</span>
                   </div>
                 </div>
-                <div className="relative z-10 mt-8">
-                  <button className="w-full bg-white text-primary font-button py-3 rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+                <div className="relative z-10 mt-8 flex flex-col gap-2">
+                  <Link href="/dashboard/questions" className="w-full bg-white text-primary font-button py-3 rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
                     <span className="material-symbols-outlined">search</span> Explorar Questões
-                  </button>
+                  </Link>
+                  <Link href="/dashboard/create-question" className="w-full border border-white/30 text-white font-button py-3 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined">add</span> Adicionar Questão
+                  </Link>
                 </div>
               </div>
             </div>

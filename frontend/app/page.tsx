@@ -6,7 +6,7 @@ export default function LandingPage() {
       {/* TopNavBar */}
       <header className="bg-white/95 backdrop-blur-sm fixed top-0 w-full z-50 border-b border-slate-200 shadow-sm">
         <nav className="flex justify-between items-center h-20 px-6 md:px-12 max-w-container-max mx-auto">
-          <div className="text-2xl font-extrabold text-[#2b73fa] tracking-tight font-h1">EduSimulados</div>
+          <div className="text-2xl font-extrabold text-[#2b73fa] tracking-tight font-h1">EdukSim</div>
           <div className="hidden md:flex gap-8 items-center">
             <Link className="text-[#2b73fa] font-bold border-b-2 border-[#2b73fa] pb-1 font-lexend text-sm" href="#">Funcionalidades</Link>
             <Link className="text-slate-600 hover:text-blue-700 transition-colors duration-200 font-lexend text-sm font-medium" href="#">Benefícios</Link>
@@ -102,12 +102,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Why EduSimulados */}
+        {/* Why EdukSim */}
         <section className="py-xl">
           <div className="max-w-container-max mx-auto px-6 md:px-gutter">
             <div className="flex flex-col lg:flex-row items-center gap-xl">
               <div className="max-w-[768px] mx-auto w-full">
-                <h2 className="font-h2 text-h2 text-text-primary mb-8 text-center">Por que EduSimulados?</h2>
+                <h2 className="font-h2 text-h2 text-text-primary mb-8 text-center">Por que EdukSim?</h2>
                 <div className="space-y-md">
                   <div className="flex gap-md">
                     <div className="flex-shrink-0 mt-1">
@@ -152,7 +152,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
           <div className="max-w-[672px] mx-auto px-6 relative z-10">
             <h2 className="font-h1 text-h1 mb-6">Pronto para elevar o nível das suas avaliações?</h2>
-            <p className="font-body-lg text-body-lg mb-lg opacity-80">Junte-se a centenas de escolas que já estão transformando a educação com o EduSimulados.</p>
+            <p className="font-body-lg text-body-lg mb-lg opacity-80">Junte-se a centenas de escolas que já estão transformando a educação com o EdukSim.</p>
             <Link href="/register" className="inline-block bg-white text-blue-900 px-xl py-4 rounded-xl font-button text-button font-bold hover:bg-blue-50 transition-all shadow-xl active:scale-95">
               Criar minha conta
             </Link>
@@ -164,8 +164,8 @@ export default function LandingPage() {
       <footer className="bg-slate-50 border-t border-slate-200 mt-auto py-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 px-6 md:px-12 max-w-container-max mx-auto">
           <div className="flex flex-col items-center md:items-start gap-2">
-            <div className="text-lg font-bold text-slate-900 font-h2">EduSimulados</div>
-            <p className="font-lexend text-xs text-slate-500">© 2024 EduSimulados. Todos os direitos reservados.</p>
+            <div className="text-lg font-bold text-slate-900 font-h2">EdukSim</div>
+            <p className="font-lexend text-xs text-slate-500">© 2026 EdukSim. Todos os direitos reservados.</p>
           </div>
           <div className="flex gap-8">
             <a className="font-lexend text-xs text-slate-500 hover:text-blue-600 underline transition-all" href="#">Termos de Uso</a>
