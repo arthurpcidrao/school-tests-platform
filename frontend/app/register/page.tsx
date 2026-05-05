@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -18,7 +19,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8000/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, role }),
@@ -38,7 +39,7 @@ export default function RegisterPage() {
 
   const handleGoogleRegister = async (credentialResponse: any) => {
     try {
-      const res = await fetch("http://localhost:8000/api/auth/google-register", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/google-register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

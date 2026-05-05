@@ -1,13 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import '../core/api_constants.dart';
 
 class ApiService {
   static final ApiService instance = ApiService._init();
   late Dio _dio;
 
   ApiService._init() {
-    final String baseUrl = kIsWeb ? 'http://localhost:8000/api/' : 'http://10.0.2.2:8000/api/';
+    final String baseUrl = ApiConstants.baseUrl;
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 10),

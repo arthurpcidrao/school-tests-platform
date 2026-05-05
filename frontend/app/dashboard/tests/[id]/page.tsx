@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Test {
   id: string;
@@ -36,14 +37,14 @@ export default function TestDetailPage() {
       if (!token) return router.push("/login");
 
       try {
-        const res = await fetch(`http://localhost:8000/api/exams/tests/${params.id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/exams/tests/${params.id}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         
         if (res.ok) {
           setTest(await res.json());
           
-          const statsRes = await fetch(`http://localhost:8000/api/exams/tests/${params.id}/stats`, {
+          const statsRes = await fetch(`${API_BASE_URL}/api/exams/tests/${params.id}/stats`, {
             headers: { "Authorization": `Bearer ${token}` }
           });
           if (statsRes.ok) {

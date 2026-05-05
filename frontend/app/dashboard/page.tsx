@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Test {
   id: string;
@@ -11,7 +12,7 @@ interface Test {
 }
 
 interface DashboardStats {
-  active_students: int;
+  active_students: number;
   recent_tests: Test[];
   top_students: { email: string; score: number }[];
 }
@@ -29,7 +30,7 @@ export default function DashboardPage() {
       }
 
       try {
-        const res = await fetch("http://localhost:8000/api/exams/dashboard-stats", {
+        const res = await fetch(`${API_BASE_URL}/api/exams/dashboard-stats`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }

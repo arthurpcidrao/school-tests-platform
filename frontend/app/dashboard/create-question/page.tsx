@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Item {
   text: string;
@@ -64,7 +65,7 @@ export default function CreateQuestionPage() {
 
     setIsSubmitting(true);
     try {
-      const resQ = await fetch("http://localhost:8000/api/exams/questions", {
+      const resQ = await fetch(`${API_BASE_URL}/api/exams/questions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

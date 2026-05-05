@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Item {
   text: string;
@@ -55,7 +56,7 @@ export default function CreateTestPage() {
       const token = localStorage.getItem("eduksim_token");
       if (!token) return;
       try {
-        const res = await fetch("http://localhost:8000/api/auth/students", {
+        const res = await fetch(`${API_BASE_URL}/api/auth/students`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) setStudents(await res.json());
@@ -68,7 +69,7 @@ export default function CreateTestPage() {
     const token = localStorage.getItem("eduksim_token");
     if (!token) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/exams/questions?subject=${encodeURIComponent(area)}`, {
+      const res = await fetch(`${API_BASE_URL}/api/exams/questions?subject=${encodeURIComponent(area)}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -147,7 +148,7 @@ export default function CreateTestPage() {
         let qId = q.id;
 
         if (!qId) {
-          const resQ = await fetch("http://localhost:8000/api/exams/questions", {
+          const resQ = await fetch(`${API_BASE_URL}/api/exams/questions`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -177,7 +178,7 @@ export default function CreateTestPage() {
         }
       }
 
-      const resT = await fetch("http://localhost:8000/api/exams/tests", {
+      const resT = await fetch(`${API_BASE_URL}/api/exams/tests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Item {
   id: string;
@@ -29,7 +30,7 @@ export default function QuestionsPage() {
       const token = localStorage.getItem("eduksim_token");
       if (!token) return router.push("/login");
 
-      let url = "http://localhost:8000/api/exams/questions";
+      let url = `${API_BASE_URL}/api/exams/questions`;
       if (subjectFilter) url += `?subject=${encodeURIComponent(subjectFilter)}`;
 
       const res = await fetch(url, {
