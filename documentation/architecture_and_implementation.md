@@ -77,15 +77,37 @@ O aplicativo Mobile foi construído com **Flutter**. Ele é destinado estritamen
 
 ---
 
-## 3. Fluxo de Integração (Como tudo se comunica)
+## 3. Fluxo Principal de Integração e Casos de Uso
 
-A orquestração do sistema segue o seguinte fluxo padrão:
+A orquestração do sistema segue regras de negócio bem definidas, onde cada ponta da arquitetura possui uma responsabilidade clara no ciclo de vida de uma prova.
 
-1. **Gestão:** O **Professor** acessa o `Frontend Web (Next.js)`, faz Login via JWT e interage com o `Backend Django`. Ele cria um novo Simulado. O Django salva o simulado no `PostgreSQL` do GCP.
-2. **Sincronização:** O **Aluno** abre o aplicativo `Mobile (Flutter)`. O aplicativo bate no `Backend Django` (usando `Dio`), detecta o novo simulado e faz o download das estruturas (tests, questions, items).
-3. **Execução:** O aluno entra na aba de "Simulados Disponíveis" e clica em iniciar. A internet pode cair. O aluno responde as questões que estão salvas no `sqflite`. O `TestProvider` contabiliza o tempo.
-4. **Envio:** Se o aluno finalizar a prova *ou* a regra anti-fraude (10s fora do app) o bloquear, o app salva as respostas como `student_responses` (com a flag local `synced=0`). Assim que a internet retornar, o aplicativo sincroniza os dados via API devolvendo o resultado ao `Backend Django` para ser gravado definitivamente.
-5. **Dashboard:** O resultado é calculado pelo backend, e a nota do aluno (`score_assigned`) fica imediatamente disponível tanto para a aba "Desempenho" do Flutter, quanto para o painel de Relatórios do Professor no Next.js.
+### 3.1 Web (Painel do Professor / Coordenação)
+O frontend web (Next.js) é o ambiente de gestão.
+- **Acesso e Gestão:** O professor (ou representante da escola) acessa o sistema, realiza o cadastro (se necessário) e faz o login. A partir da página de **Dashboard**, ele possui uma visão gerencial: pode visualizar os resultados consolidados dos alunos, verificar a quantidade de alunos ativos na plataforma e acompanhar métricas gerais.
+- **Banco de Questões e Criação de Provas:** O professor pode criar questões isoladas (alimentando um **Banco de Questões** da instituição) ou pode criar novos simulados (provas).
+- **Configuração do Simulado:** Durante a criação de uma prova, o professor tem total controle. Ele pode:
+  - Alterar o tempo estipulado por questão (que refletirá no cronômetro do app do aluno).
+  - Criar questões novas de forma dinâmica diretamente na tela de criação da prova.
+  - Selecionar questões previamente cadastradas no Banco de Questões.
+  - Selecionar nominalmente quais alunos (ou turmas) irão participar da prova (receberão a prova no mobile).
+
+### 3.2 Mobile (Aplicativo do Aluno)
+O aplicativo (Flutter) é a interface de execução focada na estabilidade e equidade (anti-fraude).
+- **Acesso:** O aluno baixa o aplicativo, realiza seu cadastro, faz o login e entra na sua conta.
+- **Painel de Provas:** A primeira tela (Dashboard) é a aba de **Simulados Disponíveis**. Nela, o aluno verá todas as provas que o professor designou. Apenas as provas "não feitas" aparecem aqui.
+- **Execução:** O aluno escolhe um simulado e inicia. O fluxo de resolução é exibido **questão a questão**. O temporizador, configurado pelo professor, fica em contagem regressiva e há monitoramento se o aluno sair do app (anti-fraude). Ao responder a última, o aluno finaliza a prova.
+- **Indisponibilidade Pós-Prova e Sincronização:** Quando a prova é finalizada, o Mobile salva tudo internamente (caso a internet caia) e, assim que possível, envia as respostas ao Backend para consolidar. Após esse envio bem-sucedido, o Banco de Dados cria o registro de tentativa (`test_attempts`) marcada como `completed` ou `finished` vinculada àquele `student_id`. A partir desse momento, quando o Mobile pedir novamente a lista de "provas disponíveis" (através da API `/api/exams/tests/available`), o Backend faz um cruzamento (JOIN) no banco de dados e **filtra (não retorna)** as provas que já possuem finalização. Isso garante que a prova fique permanentemente indisponível para uma segunda tentativa pelo app.
+- **Desempenho:** Na tela ao lado (aba Desempenho), o aplicativo busca na API o histórico de provas concluídas e exibe os acertos, notas e a evolução do aluno.
+
+### 3.3 Backend (A "Mente" Orquestradora)
+O backend (Django + Django Ninja) é o cérebro do sistema, responsável por garantir que as regras de negócio acima funcionem com segurança, orquestrando as requisições e persistindo dados.
+- **Tratamento e Validação:** Ele recebe as requisições REST de ambas as partes (Mobile e Web), valida os payloads (tipagem forte com Pydantic) e traduz isso para a lógica de negócio no banco de dados (ex: salvar toda a estrutura da prova configurada pelo professor no PostgreSQL).
+- **Orquestração com o Banco (Correção Automática):** Quando o aluno envia uma prova finalizada do celular, o backend atua como orquestrador transacional seguro:
+  1. Abre uma transação atômica no banco de dados.
+  2. Verifica as alternativas marcadas na tabela `student_responses` contra a opção correta oficial (gabarito) atrelada à questão no banco.
+  3. Calcula automaticamente a nota/pontuação final.
+  4. Salva a tentativa finalizada (`test_attempts`) e a nota de forma definitiva. Se algum erro de rede ou de integridade ocorrer nesse meio tempo, a transação inteira sofre um *rollback* automático (desfazendo todas as parciais), garantindo que não existam notas inconsistentes no PostgreSQL.
+- Concluída a transação, o resultado corrigido pelo backend reflete instantaneamente nos dashboards gerenciais Web do professor e na tela de desempenho do app do aluno.
 
 ---
 
