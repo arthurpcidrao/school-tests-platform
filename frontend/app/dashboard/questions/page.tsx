@@ -86,7 +86,12 @@ export default function QuestionsPage() {
               <div key={q.id} className="p-4 border border-slate-100 rounded-xl hover:border-primary/30 transition-colors bg-slate-50/50">
                 <div className="flex justify-between mb-2">
                   <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full">{q.subject}</span>
-                  <span className="text-xs text-slate-400">ID: {q.id.substring(0, 8)}</span>
+                  <div className="flex gap-4 items-center">
+                    <span className="text-xs text-slate-400">ID: {q.id.substring(0, 8)}</span>
+                    <Link href={`/dashboard/edit-question/${q.id}`} className="text-primary hover:text-blue-700 text-xs flex items-center font-bold">
+                      <span className="material-symbols-outlined text-[14px] mr-1">edit</span> Editar
+                    </Link>
+                  </div>
                 </div>
                 <p className="font-bold text-sm text-slate-800 mb-2">{q.stem}</p>
                 <div className="text-xs text-slate-500 space-y-1">

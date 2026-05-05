@@ -6,10 +6,25 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
 
+interface Item {
+  id: string;
+  text: string;
+  is_correct: boolean;
+}
+
+interface Question {
+  id: string;
+  subject: string;
+  stem: string;
+  question_type: string;
+  items: Item[];
+}
+
 interface Test {
   id: string;
   title: string;
   area: string;
+  questions?: Question[];
 }
 
 interface StudentStat {
@@ -37,7 +52,7 @@ export default function TestDetailPage() {
       if (!token) return router.push("/login");
 
       try {
-        const res = await fetch(`${API_BASE_URL}/api/exams/tests/${params.id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/exams/tests/${params.id}/full`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         
@@ -118,6 +133,35 @@ export default function TestDetailPage() {
           </button>
         </div>
       </div>
+
+      {test.questions && test.questions.length > 0 && (
+        <div className="bg-surface p-6 rounded-xl border border-border shadow-sm mt-8">
+          <h2 className="font-h3 text-h3 mb-6">Questões do Simulado</h2>
+          <div className="space-y-6">
+            {test.questions.map((q, index) => (
+              <div key={q.id} className="p-4 border border-slate-100 rounded-xl bg-slate-50/50">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="font-bold text-slate-800">Questão {index + 1}</span>
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full">{q.subject || test.area || "Geral"}</span>
+                </div>
+                <p className="font-medium text-sm text-slate-800 mb-4">{q.stem}</p>
+                <div className="space-y-2">
+                  {q.items.map((item, idx) => (
+                    <div key={item.id} className={`flex items-center gap-3 p-3 rounded-lg border ${item.is_correct ? 'bg-success/10 border-success' : 'bg-white border-slate-200'}`}>
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${item.is_correct ? 'border-success' : 'border-slate-300'}`}>
+                        {item.is_correct && <div className="w-3 h-3 rounded-full bg-success"></div>}
+                      </div>
+                      <span className={`text-sm ${item.is_correct ? 'font-bold text-success' : 'text-slate-600'}`}>
+                        {String.fromCharCode(65 + idx)}) {item.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

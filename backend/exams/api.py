@@ -79,6 +79,7 @@ class DashboardStatsOut(Schema):
     active_students: int
     top_students: List[TopStudentSchema]
     recent_tests: List[TestOut]
+    question_counts: dict
 
 class AnswerInSchema(Schema):
     question_id: uuid.UUID
@@ -135,6 +136,29 @@ def list_questions(request, subject: Optional[str] = None):
 @router.get("/questions/{question_id}", response=QuestionOut)
 def get_question(request, question_id: str):
     return get_object_or_404(Question, id=question_id)
+
+@router.put("/questions/{question_id}", response={200: QuestionOut})
+def update_question(request, question_id: str, payload: QuestionIn):
+    if request.auth.role != 'PROFESSOR' and not request.auth.is_staff:
+        return 401, {"detail": "Não autorizado"}
+        
+    question = get_object_or_404(Question, id=question_id)
+    
+    question.subject = payload.subject
+    question.content = payload.content
+    question.stem = payload.stem
+    question.image_url = payload.image_url
+    question.competence_bncc = payload.competence_bncc
+    question.skill_bncc = payload.skill_bncc
+    question.question_type = payload.question_type
+    question.save()
+    
+    # Recreate items
+    question.items.all().delete()
+    for item_data in payload.items:
+        Item.objects.create(question=question, **item_data.dict(exclude={'id'}))
+        
+    return 200, question
 
 # --- Rotas de Simulados ---
 
@@ -232,13 +256,18 @@ def dashboard_stats(request):
     for t in top_attempts:
         top_students.append({
             "email": t['student__email'],
-            "score": float(t['avg_score'] or 0)
+            "score": float(t['avg_score'] or 0) * 100
         })
+        
+    # Contagem de questões por matéria
+    qs_counts = Question.objects.values('subject').annotate(count=Count('id'))
+    question_counts = {item['subject']: item['count'] for item in qs_counts}
         
     return {
         "active_students": active_students,
         "top_students": top_students,
-        "recent_tests": recent_tests
+        "recent_tests": recent_tests,
+        "question_counts": question_counts
     }
 
 @router.get("/tests/{test_id}", response=TestOut)
@@ -343,3 +372,27 @@ def test_stats(request, test_id: uuid.UUID):
         "completed_students": attempts.filter(status='FINISHED').count(),
         "students": students_list
     }
+
+@router.get("/students/{email}/attempts", response=List[AttemptOutSchema])
+def student_attempts(request, email: str):
+    if request.auth.role != 'PROFESSOR' and not request.auth.is_staff:
+        return 401, {"detail": "Não autorizado"}
+        
+    attempts = TestAttempt.objects.filter(student__email=email, status='FINISHED').order_by('-finished_at')
+    result = []
+    for att in attempts:
+        total_qs = att.responses.count()
+        correct_qs = att.responses.filter(is_correct=True).count()
+        perc = (correct_qs / total_qs * 100) if total_qs > 0 else 0
+        
+        result.append({
+            "id": att.id,
+            "test_id": att.test_id,
+            "test_title": att.test.title,
+            "test_area": att.test.area,
+            "score_percentage": perc,
+            "correct_count": correct_qs,
+            "total_count": total_qs,
+            "finished_at": att.finished_at.isoformat() if att.finished_at else None
+        })
+    return result

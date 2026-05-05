@@ -15,10 +15,14 @@ interface DashboardStats {
   active_students: number;
   recent_tests: Test[];
   top_students: { email: string; score: number }[];
+  question_counts: Record<string, number>;
 }
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
+  const [studentAttempts, setStudentAttempts] = useState<any[]>([]);
+  const [loadingAttempts, setLoadingAttempts] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -51,6 +55,25 @@ export default function DashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem("eduksim_token");
     router.push("/");
+  };
+
+  const handleStudentClick = async (email: string) => {
+    setSelectedStudent(email);
+    setLoadingAttempts(true);
+    setStudentAttempts([]);
+    try {
+      const token = localStorage.getItem("eduksim_token");
+      const res = await fetch(`${API_BASE_URL}/api/exams/students/${email}/attempts`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setStudentAttempts(await res.json());
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingAttempts(false);
+    }
   };
 
   return (
@@ -282,7 +305,7 @@ export default function DashboardPage() {
                     <thead className="bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       <tr>
                         <th className="px-6 py-3 whitespace-nowrap">Aluno</th>
-                        <th className="px-6 py-3 whitespace-nowrap">Último Simulado</th>
+                        <th className="px-6 py-3 whitespace-nowrap">Média simulados</th>
                         <th className="px-6 py-3 whitespace-nowrap">Nota</th>
                         <th className="px-6 py-3 text-right">Ação</th>
                       </tr>
@@ -297,7 +320,7 @@ export default function DashboardPage() {
                         </tr>
                       ) : (
                         stats.top_students.map((student, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                          <tr key={idx} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => handleStudentClick(student.email)}>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-xs">
@@ -306,7 +329,7 @@ export default function DashboardPage() {
                                 <span className="text-sm font-semibold whitespace-nowrap">{student.email}</span>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-xs text-text-secondary whitespace-nowrap">Último Simulado</td>
+                            <td className="px-6 py-4 text-xs text-text-secondary whitespace-nowrap">Média Simulados</td>
                             <td className="px-6 py-4"><span className="text-sm font-bold text-success">{student.score.toFixed(1)}</span></td>
                             <td className="px-6 py-4 text-right">
                               <button className="text-primary hover:bg-blue-50 p-1 rounded-md">
@@ -327,11 +350,19 @@ export default function DashboardPage() {
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary-container/30 rounded-full -ml-16 -mb-16 blur-3xl"></div>
                 <div className="relative z-10">
                   <h3 className="font-h3 text-h3 mb-2">Banco de Questões</h3>
-                  <p className="text-white/80 text-body-sm max-w-[320px]">Acesse sua biblioteca de mais de 4.200 questões acadêmicas. Verificadas por padrões pedagógicos.</p>
+                  <p className="text-white/80 text-body-sm max-w-[320px]">Acesse sua biblioteca de mais de {stats?.question_counts ? Object.values(stats.question_counts).reduce((a, b) => a + b, 0) : 0} questões acadêmicas. Verificadas por padrões pedagógicos.</p>
                   <div className="mt-6 flex flex-wrap gap-2">
-                    <span className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">Matemática (824)</span>
-                    <span className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">Física (412)</span>
-                    <span className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">Química (398)</span>
+                    {stats?.question_counts && Object.keys(stats.question_counts).length > 0 ? (
+                      Object.entries(stats.question_counts)
+                        .filter(([_, count]) => count > 0)
+                        .map(([subject, count]) => (
+                          <span key={subject} className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold">
+                            {subject} ({count})
+                          </span>
+                        ))
+                    ) : (
+                      <span className="px-3 py-1 bg-white/20 rounded-lg text-xs font-bold opacity-70">Nenhuma questão criada</span>
+                    )}
                   </div>
                 </div>
                 <div className="relative z-10 mt-8 flex flex-col gap-2">
@@ -352,6 +383,60 @@ export default function DashboardPage() {
       <Link href="/dashboard/create-test" className="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] md:hidden">
         <span className="material-symbols-outlined text-3xl">add</span>
       </Link>
+
+      {/* Student Details Modal */}
+      {selectedStudent && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <div>
+                <h3 className="font-h2 text-h2 text-on-surface">Desempenho do Aluno</h3>
+                <p className="text-sm text-text-secondary">{selectedStudent}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedStudent(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors"
+              >
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1">
+              {loadingAttempts ? (
+                <div className="flex justify-center items-center py-12 text-slate-400">
+                  <span className="material-symbols-outlined animate-spin mr-2">refresh</span>
+                  Carregando simulados...
+                </div>
+              ) : studentAttempts.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <span className="material-symbols-outlined text-4xl mb-2 opacity-50">description</span>
+                  <p>Nenhum simulado finalizado encontrado.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {studentAttempts.map(attempt => (
+                    <div key={attempt.id} className="p-4 border border-slate-200 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-primary/30 transition-colors">
+                      <div>
+                        <h4 className="font-bold text-slate-800">{attempt.test_title}</h4>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                          <span className="px-2 py-0.5 bg-slate-100 rounded-md">{attempt.test_area || "Geral"}</span>
+                          {attempt.finished_at && <span>Finalizado em {new Date(attempt.finished_at).toLocaleDateString()}</span>}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className={`text-xl font-bold ${attempt.score_percentage >= 70 ? 'text-success' : attempt.score_percentage >= 50 ? 'text-orange-500' : 'text-danger'}`}>
+                          {attempt.score_percentage.toFixed(1)}%
+                        </span>
+                        <span className="text-xs text-slate-500">{attempt.correct_count} de {attempt.total_count} acertos</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
